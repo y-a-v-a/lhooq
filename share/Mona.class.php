@@ -74,7 +74,7 @@ class Mona {
 		ob_start();
 		var_dump($msg);
 		$msg = ob_get_clean();
-		@file_put_contents('log.txt',$msg,FILE_APPEND);
+		@file_put_contents('../var/log/log.txt',$msg,FILE_APPEND);
 	}
 	
 	public function __destroy() {
