@@ -1,28 +1,47 @@
 <?php
 class BasJan {
 	private $_textImg;
-	
+
 	private $_face_pool = array();
-	
-	private $_google_url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&key=ABQIAAAAq4AIuvYeP4AL8FNxqeSM6BS1_wxKxGdp2RzRaADWaiSLCsSD_BRB9crcfrmh0Bj8s6TsAcqGepcWcg&q=man%20crying&imgtype=face&rsz=8&safe=off&start=";
-	
+
+	private $_google_url = "https://www.googleapis.com/customsearch/v1?key=#APIKEY#&imgType=face&imgSize=medium&fileType=jpg&q=#QUERY#&searchType=image&safe=medium&cx=001019564263977871109:d0hasykupmy&start=";
+
 	private $_json_result;
-	
-	private $_referer = '&userip=94.124.94.40';
-	//private $_referer = '&userip=213.93.210.241';
-	
+
 	private $_img;
-	
-	public function __construct() {
+
+	private $i = 10;
+
+	private $queries = array(
+		'man crying',
+		'crying dude',
+		'male face crying'
+	);
+
+	public function __construct($key) {
+		$this->key = $key;
+		$googleUrl = str_replace('#APIKEY#', $this->key, $this->_google_url);
+		$query = urlencode($this->queries[array_rand($this->queries)]);
+		$googleUrl = str_replace('#QUERY#', $query, $googleUrl);
+		$googleUrl = $googleUrl . rand(1, 40);
+
 		$this->_textImg = file_get_contents("bas-jan-ader.png");
-		$this->_json_result = @file_get_contents($this->_google_url . rand(1,66) . $this->_referer);
+		$this->_json_result = @file_get_contents($googleUrl);
 		$this->_prepare_faces();
 	}
-	
+
 	public function build() {
-		$oldface = imagecreatefromstring(@file_get_contents($this->_face_pool[rand(0,7)]));
-		// Find base image size 
-		$ofwidth = imagesx($oldface); 
+		$oldface = @imagecreatefromstring(@file_get_contents($this->_face_pool[rand(0,count($this->_face_pool))]));
+		if ($oldface === false) {
+			if ($this->i < 10) {
+				$this->i++;
+				return $this->build();
+			} else {
+				throw new Exception('Too much recursion.');
+			}
+		}
+		// Find base image size
+		$ofwidth = imagesx($oldface);
 		$ofheight = imagesy($oldface);
 		$fwidth = 600;
 		$fheight = ((600/$ofwidth)*$ofheight);
@@ -35,7 +54,7 @@ class BasJan {
 		$moustache = @imagecreatefromstring($this->_textImg);
 		$mwidth = imagesx($moustache);
 		$mheight = imagesy($moustache);
-		
+
 		$t = imagecopy($face, $moustache,
 			$fwidth - 333,$fheight - 288,
 			0, 0, $mwidth,$mheight);
@@ -49,37 +68,36 @@ class BasJan {
 		imagedestroy($moustache);
 		return $this;
 	}
-	
+
 	private function _prepare_faces() {
 		if ($this->_json_result === false) {
 			throw new Exception('No result');
 		}
-		$results = json_decode($this->_json_result);
-		
-		if ($results->responseStatus == 200 &&
-			count($results->responseData->results) > 0) {
-			foreach($results->responseData->results as $result) {
-				$this->_face_pool[] = $result->unescapedUrl;
+		$results = json_decode($this->_json_result, true);
+
+		if (count($results['items']) > 0) {
+			foreach($results['items'] as $result) {
+				$this->_face_pool[] = $result['link'];
 			}
 		}
 		return $this;
 	}
-	
+
 	public function show() {
 		return $this->_img;
 	}
-	
+
 	public function __toString() {
 		return "Cannot convert image to string";
 	}
-	
+
 	private function log($msg) {
 		ob_start();
 		var_dump($msg);
 		$msg = ob_get_clean();
 		@file_put_contents('../var/log/log.txt',$msg,FILE_APPEND);
 	}
-	
+
 	public function __destroy() {
 		imagedestroy($this->_img);
 	}

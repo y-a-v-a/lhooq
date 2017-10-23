@@ -1,18 +1,30 @@
 <?php
-error_reporting(E_ALL);
+error_reporting(0);
+session_start();
 // instantiate new Mona class and echo the image
+require_once 'k.php';
 require_once 'lib/Mona.class.php';
-$img = new Mona();
+
 $image = null;
+
+function getFromCache() {
+  $imgs = glob('cache/img-*.jpg');
+  return $imgs[array_rand($imgs)];
+}
 
 header('Content-type: image/jpeg');
 if (rand(0,2) === 0) {
-	$data = $img->build()->show();
-	$image = "cache/". uniqid("img-") . '.jpg';
-	@file_put_contents($image ,$data);
+  try {
+    $img = new Mona($key);
+  	$data = $img->build()->show();
+  	$image = "cache/". uniqid("img-") . '.jpg';
+  	@file_put_contents($image ,$data);
+  } catch(Exception $e) {
+    header('X-lhooq: apifail');
+    $image = getFromCache();
+  }
 } else {
-	$imgs = glob('cache/img-*.jpg');
-	$image = $imgs[array_rand($imgs)];
+	$image = getFromCache();
 }
 echo @file_get_contents($image);
 

@@ -1,0 +1,5 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^lhooq.jpg$ /lhooq.php [NC,L]
+RewriteRule ^toosad.jpg$ /toosad.php [NC,L]
