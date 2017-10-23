@@ -7,9 +7,20 @@
 
 This project consists of two variants: www.l-h-o-o-q.org and www.i-m-too-sad-to-tell-you.org. Both use a Google CSE (Custom Search Engine) to obtain images. Images are cached and a simple 50-50 chance is defined for either loading a new image from Google or returning an existing one. This is done to reduce the amount of requests to the Google CSE for which we have to pay.
 
+### l-h-o-o-q.org
+
+![l-h-o-o-q](https://raw.githubusercontent.com/y-a-v-a/lhooq/master/www/l-h-o-o-q.jpg)
+
+### i-m-too-sad-to-tell-you.org
+
+![i-m-too-sad-to-tell-you](https://raw.githubusercontent.com/y-a-v-a/lhooq/master/www/i-m-too-sad-to-tell-you.jpg)
+
 ## Key
 
 Indeed, the API-key is missing. It's supposed to be in a file called `k.php`. Get one via the Google developer console.
 
+## License
+
 (c) 2011-2017 ax710.org & y-a-v-a.org
+
 [cc-by 3.0](https://creativecommons.org/licenses/by/3.0/nl/)
